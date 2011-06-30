@@ -48,16 +48,17 @@ def main():
     version = None
     out = BytesIO()
     with ZipOutFile(out) as zp:
-        for f in path(config["dirname"]).walk():
+        dirname = path(config["dirname"]).expanduser()
+        for f in dirname.walk():
             if f.isdir() or f.basename() == "install.rdf":
                 continue
-            zf = f[len(config["dirname"]) + 1:]
+            zf = f[len(dirname) + 1:]
             if zf.endswith(".png"):
                 zp.write(f, zf, compress_type=ZIP_STORED)
             else:
                 zp.write(f, zf)
 
-        with open(path(config["dirname"]) / "install.rdf") as domp:
+        with open(dirname / "install.rdf") as domp:
             dom = XML(domp)
 
         un = updaterdf.getElementsByTagName("RDF:Description")[0]
@@ -134,7 +135,7 @@ def main():
                          replace=True
                          )
     else:
-        with open(path.expanduser(config["altuppath"]), "wb") as up:
+        with open(path(config["altuppath"]).expanduser(), "wb") as up:
             up.write(updaterdf)
 
     return 0
