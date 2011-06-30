@@ -64,6 +64,7 @@ def main():
         with open(dirname / "install.rdf") as domp:
             dom = XML(domp)
 
+        # Set up update.rdf extid
         un = updaterdf.getElementsByTagName("RDF:Description")[0]
         vn = dom.getElementsByTagName("em:id")[0]
         un.setAttribute("about",
@@ -77,8 +78,11 @@ def main():
         version = vn.data + "." + strftime("%Y%m%d%H%M")
         vn.data = version
 
+        # Set up update.rdf version
         un = updaterdf.getElementsByTagName("em:version")[0]
         un.firstChild.data = version
+
+        # Set up update.rdf target application
         un = un.parentNode
         for n in dom.getElementsByTagName("em:targetApplication"):
             nn = n.cloneNode(True)
@@ -89,19 +93,23 @@ def main():
         # Get the update info in order
         for n in dom.getElementsByTagName("em:updateKey"):
             n.parentNode.removeChild(n)
-        for n in dom.getElementsByTagName("em:updateURL"):
+        try:
+            n = dom.getElementsByTagName("em:updateURL")[0]
             while n.firstChild:
                 n.removeChild(n.firstChild)
-            update_url = (config["altupurl"]
-                          or"https://github.com/downloads/%s/update-nightly.rdf" % config["repo"]
-                          )
-            n.appendChild(dom.createTextNode(update_url))
+        except:
+            n = dom.createElement("em:updateURL")
+            un.appendChild(n)
+        update_url = (config["altupurl"]
+                      or"https://github.com/downloads/%s/update-nightly.rdf" % config["repo"]
+                      )
+        n.appendChild(dom.createTextNode(update_url))
+
+        # write install.rdf
         zp.writestr("install.rdf", dom.toxml(encoding="utf-8"))
 
     out.seek(0)
     outfile = "%s-nightly-%s.xpi" % (config["extension"], version)
-
-    print outfile
 
     downloads = GHDownloads(repo=config["repo"],
                             user=config["user"],
