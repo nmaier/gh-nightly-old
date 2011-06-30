@@ -75,7 +75,7 @@ def main():
 
         # Set up the version
         vn = dom.getElementsByTagName("em:version")[0].firstChild
-        version = vn.data + "." + strftime("%Y%m%d%H%M")
+        version = vn.data + "." + strftime("%Y%m%d.%H%M")
         vn.data = version
 
         # Set up update.rdf version
@@ -118,7 +118,7 @@ def main():
 
     # clean up
     cutoff = datetime.date.today() - datetime.timedelta(365/12)
-    cutoff = cutoff.strftime("%Y%m%d%H%M")
+    cutoff = cutoff.strftime("%Y%m%d.%H%M")
     for df in downloads.list():
         m = re.search(r"nightly.*\.(\d{8})", df.name)
         if not m or m.group(1) > cutoff:
