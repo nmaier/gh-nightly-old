@@ -82,9 +82,9 @@ def main():
         un = un.parentNode
         for n in dom.getElementsByTagName("em:targetApplication"):
             nn = n.cloneNode(True)
-            for nd in n.getElementsByTagName("Description"):
+            for nd in nn.getElementsByTagName("Description"):
                 nd.tagName = "RDF:Description"
-            un.appendChild(n)
+            un.appendChild(nn)
 
         # Get the update info in order
         for n in dom.getElementsByTagName("em:updateKey"):
