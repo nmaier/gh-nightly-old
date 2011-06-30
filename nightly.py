@@ -129,11 +129,13 @@ def main():
                      sum.hexdigest()
                      )
     hash.appendChild(updaterdf.createTextNode(sum))
-    un.appendChild(hash)
 
     link = updaterdf.createElement("em:updateLink")
     link.appendChild(updaterdf.createTextNode(upload.download_url))
-    un.appendChild(link)
+
+    for n in un.getElementsByTagName("em:targetApplication"):
+        n.appendChild(hash.cloneNode(True))
+        n.appendChild(link.cloneNode(True))
 
     updaterdf = updaterdf.toxml(encoding="utf-8")
 
