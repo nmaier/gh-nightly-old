@@ -108,12 +108,13 @@ def main():
     # clean up
     cutoff = datetime.date.today() - datetime.timedelta(365/12)
     cutoff = cutoff.strftime("%Y%m%d")
-#    for df in downloads.list():
-#        m = re.search(r"nightly.*\.(\d{8})", df.name)
-#        if not m or m.group(1) > cutoff:
-#            continue
-#        downloads.delete(df.id)
+    for df in downloads.list():
+        m = re.search(r"nightly.*\.(\d{8})", df.name)
+        if not m or m.group(1) > cutoff:
+            continue
+        downloads.delete(df.id)
 
+    # upload the new file
     upload = downloads.upload(out, outfile, replace=True)
 
     # finish update.rdf
@@ -132,6 +133,7 @@ def main():
 
     updaterdf = updaterdf.toxml(encoding="utf-8")
 
+    # put the update.rdf
     if not "altuppath" in config:
         downloads.upload(BytesIO(updaterdf),
                          "update-nightly.rdf",
