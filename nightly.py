@@ -28,7 +28,10 @@ def main():
 
     # load config
     cf = SafeConfigParser()
-    cf.read(nightlydir / "config.ini")
+    if len(sys.argv) != 2:
+        cf.read(nightlydir / "config.ini")
+    else:
+        cf.read(path(sys.argv[1]))
     config = dict()
     for k,v in [(key, cf.get("github", key)) for key in ["user", "pass", "repo", "extension", "dirname", "hashalgo"]]:
         if not v:
