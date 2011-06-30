@@ -81,7 +81,10 @@ def main():
         un.firstChild.data = version
         un = un.parentNode
         for n in dom.getElementsByTagName("em:targetApplication"):
-            un.appendChild(n.cloneNode(True))
+            nn = n.cloneNode(True)
+            for nd in n.getElementsByTagName("Description"):
+                nd.tagName = "RDF:Description"
+            un.appendChild(n)
 
         # Get the update info in order
         for n in dom.getElementsByTagName("em:updateKey"):
@@ -133,9 +136,10 @@ def main():
     link = updaterdf.createElement("em:updateLink")
     link.appendChild(updaterdf.createTextNode(upload.download_url))
 
-    for n in un.getElementsByTagName("em:targetApplication"):
-        n.appendChild(hash.cloneNode(True))
-        n.appendChild(link.cloneNode(True))
+    for nt in un.getElementsByTagName("em:targetApplication"):
+        for n in nt.getElementsByTagName("RDF:Description"):
+            n.appendChild(hash.cloneNode(True))
+            n.appendChild(link.cloneNode(True))
 
     updaterdf = updaterdf.toxml(encoding="utf-8")
 
