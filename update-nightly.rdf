@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <RDF:Description about="urn:mozilla:extension:extid">
+    <em:updates>
+      <RDF:Seq>
+        <RDF:li>
+          <RDF:Description>
+            <em:version>0</em:version>
+          </RDF:Description>
+        </RDF:li>
+      </RDF:Seq>
+    </em:updates>
+  </RDF:Description>
+</RDF:RDF>
