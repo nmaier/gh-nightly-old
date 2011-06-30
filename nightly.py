@@ -115,7 +115,11 @@ def main():
         downloads.delete(df.id)
 
     # upload the new file
-    upload = downloads.upload(out, outfile, replace=True)
+    upload = downloads.upload(
+                              out,
+                              outfile,
+                              mime="application/x-xpinstall",
+                              replace=True)
 
     # finish update.rdf
     hash = updaterdf.createElement("em:updateHash")

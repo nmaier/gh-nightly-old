@@ -121,7 +121,7 @@ class Downloads(object):
         raise DownloadsException("no download with that name")
 
 
-    def upload(self, file_or_name, file_name=None, replace=False):
+    def upload(self, file_or_name, file_name=None, mime=None, replace=False):
         if isinstance(file_or_name, basestring):
             fo = open(file_or_name, "rb")
             try:
@@ -130,6 +130,7 @@ class Downloads(object):
                 fo.close()
             return self.upload(io,
                                file_name or os.path.basename(file_or_name),
+                               mime=mime,
                                replace=replace
                                )
 
@@ -139,9 +140,13 @@ class Downloads(object):
         data = file_or_name.read()
         data_len = len(data)
 
-        j = json.dumps({"name": file_name,
-                        "size": data_len
-                        })
+        j = {"name": file_name,
+             "size": data_len
+             }
+        if mime:
+            j["content_type"] = mime
+
+        j = json.dumps(j)
         try:
             req = self._request(data=j)
         except urllib2.HTTPError,ex:
@@ -152,7 +157,11 @@ class Downloads(object):
             for e in j["errors"]:
                 if e["code"] == "already_exists":
                     self.delete(file_name)
-                    return self.upload(BytesIO(data), file_name, replace=False)
+                    return self.upload(
+                                       BytesIO(data),
+                                       file_name,
+                                       mime=mime,
+                                       replace=False)
             raise
 
         j = json.load(req)
