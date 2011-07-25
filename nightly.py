@@ -22,28 +22,45 @@ class ZipOutFile(ZipFile):
     def __exit__(self, type, value, traceback):
         self.close()
 
+KEYS = ["user", "pass", "repo", "extension", "dirname", "hashalgo"]
+CKEYS = ["altupdateurl", "altupdatepath", "versionextra"]
 
 def main():
     nightlydir = path(__file__).dirname()
 
+    parser = optparse.OptionParser()
+    parser.add_option("-u", "--user")
+    parser.add_option("-p", "--pass")
+    parser.add_option("-r", "--repo")
+    parser.add_option("-e", "--extension")
+    parser.add_option("-d", "--dirname")
+    parser.add_option("-v", "--versionextra")
+    parser.add_option("--hashalgo")
+    parser.add_option("--altupdateurl")
+    parser.add_option("--altupdatepath")
+
+    options, args = parser.parse_args()
+
     # load config
     cf = SafeConfigParser()
-    if len(sys.argv) != 2:
-        cf.read(nightlydir / "config.ini")
+    if args:
+        cf.read(path(args[0]))
     else:
-        cf.read(path(sys.argv[1]))
+        cf.read(nightlydir / "config.ini")
     config = dict()
-    for k,v in [(key, cf.get("github", key)) for key in ["user", "pass", "repo", "extension", "dirname", "hashalgo"]]:
-        if not v:
-            raise Exception("missing config for " + k)
-        config[k] = v
-    try:
-        config["altupurl"] = cf.get("alternateupdate", "url")
-        config["altuppath"] = cf.get("alternateupdate", "path")
-    except:
-        config["altupurl"] = None
-        config["altuppath"] = None
+    for k in KEYS:
+        try:
+            config[k] = getattr(options, k) or cf.get("github", k)
+        except:
+            config[k] = None
 
+        if not config[k]:
+            raise Exception("Not all required config keys specified: " + k)
+    for k in CKEYS:
+        try:
+            config[k] = getattr(options, k) or cf.get("github", k)
+        except:
+            config[k] = None
 
     with open(nightlydir / "update-nightly.rdf") as domp:
         updaterdf = XML(domp)
@@ -76,6 +93,8 @@ def main():
         # Set up the version
         vn = dom.getElementsByTagName("em:version")[0].firstChild
         version = vn.data + "." + strftime("%Y%m%d.%H%M")
+        if config["versionextra"]:
+            version += "." + config["versionextra"]
         vn.data = version
 
         # Set up update.rdf version
@@ -100,7 +119,7 @@ def main():
         except:
             n = dom.createElement("em:updateURL")
             un.appendChild(n)
-        update_url = (config["altupurl"]
+        update_url = (config["altupdateurl"]
                       or"https://github.com/downloads/%s/update-nightly.rdf" % config["repo"]
                       )
         n.appendChild(dom.createTextNode(update_url))
@@ -152,16 +171,18 @@ def main():
     updaterdf = updaterdf.toxml(encoding="utf-8")
 
     # put the update.rdf
-    if not "altuppath" in config:
+    if not "altupdatepath" in config:
         downloads.upload(BytesIO(updaterdf),
                          "update-nightly.rdf",
                          replace=True
                          )
     else:
-        with open(path(config["altuppath"]).expanduser(), "wb") as up:
+        with open(path(config["altupdatepath"]).expanduser(), "wb") as up:
             up.write(updaterdf)
 
     return 0
 
 if __name__ == "__main__":
+    import optparse
     sys.exit(main())
+
